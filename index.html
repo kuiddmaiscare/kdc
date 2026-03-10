@@ -72,13 +72,13 @@ body{
 .slide-in{animation:slideIn .4s cubic-bezier(.34,1.4,.64,1) both;}
 @keyframes slideIn{from{opacity:0;transform:translateX(-16px)}to{opacity:1;transform:translateX(0)}}
 
-/* ════/* ════════════════════════════════════════════════════════════
+/* ════════════════════════════════════════════════════════════
    LANDING PAGE — KUIDD+ Care v4
    Design: refined dark-to-light, editorial, premium healthcare
 ════════════════════════════════════════════════════════════ */
 
 /* ── Fontes LP ──────────────────────────────────────────── */
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Outfit:wght@300;400;500;600;700;800;900&display=swap');
+/* Fonts loaded in <head> via <link> */
 
 /* ── Variáveis LP ───────────────────────────────────────── */
 :root{
@@ -857,11 +857,9 @@ body{
 .login-screen[style*="display: flex"],
 .login-screen[style*="display:flex"] { display:flex !important; }
 
-════════════════════════════════════════════════════════
+/* ════════════════════════════════════════════════════════
    PLATFORM SHELL
 ════════════════════════════════════════════════════════════ */
-#platform-wrap{display:none;}
-#platform-wrap.active{display:flex;}
 .platform{display:flex;min-height:100vh;background:var(--navy);}
 
 /* ── SIDEBAR ── */
@@ -3969,7 +3967,8 @@ function validatePin() {
 function startSession(user) {
   CUR_USER = user;
   if (user.role === 'cuidador') CUR_CG_ID = user.cgId;
-  document.getElementById('login-screen').classList.add('hidden');
+  const ls = document.getElementById('login-screen');
+  if (ls) ls.classList.add('hidden');
   document.getElementById('platform-wrap').classList.add('active');
   setupSidebar();
   renderNav();
@@ -3985,10 +3984,12 @@ function doLogout() {
   CUR_USER = CUR_FAM_ID = CUR_PAT_ID = CUR_CG_ID = null;
   PIN_ENTERED = '';
   document.getElementById('platform-wrap').classList.remove('active');
-  document.getElementById('login-screen').classList.remove('hidden');
-  ['email-form','pin-form'].forEach(id => document.getElementById(id).style.display = 'none');
+  const ls = document.getElementById('login-screen');
+  if (ls) ls.classList.remove('hidden');
+  ['email-form','pin-form'].forEach(id => { const el=document.getElementById(id); if(el) el.style.display='none'; });
   document.querySelectorAll('.role-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById('login-err').textContent = '';
+  const le = document.getElementById('login-err');
+  if (le) le.textContent = '';
   goToLP();
 }
 
@@ -5691,15 +5692,17 @@ setTimeout(function() {
 }, 800);
 
 (function() {
-  if (typeof IntersectionObserver === 'undefined') return;
-  var io = new IntersectionObserver(function(entries) {
-    entries.forEach(function(e) {
-      if (e.isIntersecting) e.target.classList.add('visible');
+  if (typeof IntersectionObserver === 'undefined')    return;
+  var obs = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        obs.unobserve(entry.target);
+      }
     });
-  }, { threshold: 0.08, rootMargin: '0px 0px -20px 0px' });
-  document.querySelectorAll('.lp-anim').forEach(function(el) { io.observe(el); });
+  }, { threshold: 0.15 });
+  document.querySelectorAll('.lp-anim').forEach(function(el) { obs.observe(el); });
 })();
-
 </script>
 </body>
 </html>
